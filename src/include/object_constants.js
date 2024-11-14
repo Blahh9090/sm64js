@@ -1291,6 +1291,18 @@ export const WOODEN_POST_BP_NO_COINS_MASK = 0x0000FF00
     export const BBH_NEAR_MERRY_GO_ROUND_ROOM = 10
     export const BBH_DYNAMIC_SURFACE_ROOM     = 0
     export const BBH_OUTSIDE_ROOM             = 13
+    
+/* Coffin Spawner */
+    /* oAction */
+    export const COFFIN_SPAWNER_ACT_COFFINS_UNLOADED = 0
+    
+/* Coffin */
+    /* oAction */
+    export const COFFIN_ACT_IDLE     = 0
+    export const COFFIN_ACT_STAND_UP = 1
+
+    /* oBhvParams2ndByte */
+    export const COFFIN_BP_STATIC = 0
 
 /* Bob-omb */
     /* oBehParams2ndByte */
