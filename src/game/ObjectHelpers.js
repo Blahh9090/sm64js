@@ -2089,7 +2089,7 @@ export const obj_set_hitbox = (obj, hitbox) => {
         obj.rawData[oInteractType] = hitbox.interactType
         obj.rawData[oDamageOrCoinValue] = hitbox.damageOrCoinValue
         obj.rawData[oHealth] = hitbox.health
-        obj.rawData[oNumLootCoins] = hitbox.NumLootCoins
+        obj.rawData[oNumLootCoins] = hitbox.numLootCoins
 
         cur_obj_become_tangible();
     }

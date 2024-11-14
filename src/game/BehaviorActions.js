@@ -14,7 +14,7 @@ export const sCapSaveFlags = [
 // skipped adding sBooHitRotations, already in the one file it's used
 
 const sMistParticles = {
-    bhvParam: 2,
+    behParam: 2,
     count: 20,
     model: MODEL_MIST,
     offsetY: 0,
@@ -22,7 +22,7 @@ const sMistParticles = {
     forwardVelRange: 5,
     velYBase: 30,
     velYRange: 20,
-    gravity: 252,
+    gravity: -4,
     dragStrength: 30,
     sizeBase: 330.0,
     sizeRange: 10.0
