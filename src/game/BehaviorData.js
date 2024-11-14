@@ -52,6 +52,7 @@ import * as _bbh_haunted_bookshelf    from "./behaviors/bbh_haunted_bookshelf.in
 import * as _bbh_merry_go_round       from "./behaviors/bbh_merry_go_round.inc"
 import * as _bbh_tilting_trap         from "./behaviors/bbh_tilting_trap.inc"
 import * as _bird                     from "./behaviors/bird.inc"
+import * as _blue_coin                from "./behaviors/blue_coin.inc"
 import * as _bobomb                   from "./behaviors/bobomb.inc"
 import * as _boo                      from "./behaviors/boo.inc"
 import * as _boo_cage                 from "./behaviors/boo_cage.inc"
@@ -210,6 +211,7 @@ import { toad_seg6_anims_0600FB58 } from "../actors/toad/anims.inc"
 import { bbh_seg7_collision_tilt_floor_platform } from "../levels/bbh/tilting_trap_platform/collision.inc"
 import { bbh_seg7_collision_mesh_elevator } from "../levels/bbh/mesh_elevator/collision.inc"
 import { bbh_seg7_collision_coffin } from "../levels/bbh/coffin/collision.inc"
+import { blue_coin_switch_seg8_collision_08000E98 } from "../actors/blue_coin_switch/collision.inc"
 
 export const OBJ_LIST_PLAYER = 0     //  (0) mario
 export const OBJ_LIST_UNUSED_1 = 1    //  (1) (unused)
@@ -859,7 +861,7 @@ const bhvCoinSparkles = [
     DEACTIVATE(),
 ];
 
-const bhvGoldenCoinSparkles = [
+export const bhvGoldenCoinSparkles = [
     BEGIN(OBJ_LIST_DEFAULT, 'bhvGoldenCoinSparkles'),
     OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
     DISABLE_RENDERING(),
@@ -1631,6 +1633,30 @@ const bhvWhitePuff2 = [
         ADD_INT(oAnimState, 1),
     END_REPEAT(),
     DEACTIVATE(),
+]
+
+export const bhvBlueCoinSwitch = [
+    BEGIN(OBJ_LIST_SURFACE, 'bhvBlueCoinSwitch'),
+    OR_INT(oFlags, OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE),
+    LOAD_COLLISION_DATA(blue_coin_switch_seg8_collision_08000E98),
+    BEGIN_LOOP(),
+        CALL_NATIVE('bhv_blue_coin_switch_loop'),
+    END_LOOP(),
+]
+
+export const bhvHiddenBlueCoin = [
+    BEGIN(OBJ_LIST_LEVEL, 'bhvHiddenBlueCoin'),
+    SET_INT(oInteractType, INTERACT_COIN),
+    OR_INT(oFlags, (OBJ_FLAG_ACTIVE_FROM_AFAR | OBJ_FLAG_COMPUTE_DIST_TO_MARIO | OBJ_FLAG_UPDATE_GFX_POS_AND_ANGLE)),
+    BILLBOARD(),
+    SET_HITBOX(/*Radius*/ 100, /*Height*/ 64),
+    SET_INT(oDamageOrCoinValue, 5),
+    SET_INT(oIntangibleTimer, 0),
+    SET_INT(oAnimState, -1),
+    BEGIN_LOOP(),
+        CALL_NATIVE('bhv_hidden_blue_coin_loop'),
+        ADD_INT(oAnimState, 1),
+    END_LOOP(),
 ]
 
 const bhvBreakBoxTriangle = [
@@ -3328,6 +3354,7 @@ gLinker.behaviors.bhvBirdsSoundLoop = bhvBirdsSoundLoop
 gLinker.behaviors.bhvBitfsSinkingPlatforms = bhvBitfsSinkingPlatforms
 gLinker.behaviors.bhvBitfsSinkingCagePlatform = bhvBitfsSinkingCagePlatform
 gLinker.behaviors.bhvBitfsTiltingInvertedPyramid = bhvBitfsTiltingInvertedPyramid
+gLinker.behaviors.bhvBlueCoinSwitch = bhvBlueCoinSwitch
 gLinker.behaviors.bhvBobBowlingBallSpawner = bhvBobBowlingBallSpawner
 gLinker.behaviors.bhvBobomb = bhvBobomb
 gLinker.behaviors.bhvBobombAnchorMario = bhvBobombAnchorMario
@@ -3426,6 +3453,7 @@ gLinker.behaviors.bhvHidden1up = bhvHidden1up
 gLinker.behaviors.bhvHidden1upInPoleSpawner = bhvHidden1upInPoleSpawner
 gLinker.behaviors.bhvHidden1upTrigger = bhvHidden1upTrigger
 gLinker.behaviors.bhvHiddenAt120Stars = bhvHiddenAt120Stars
+gLinker.behaviors.bhvHiddenBlueCoin = bhvHiddenBlueCoin
 gLinker.behaviors.bhvHiddenRedCoinStar = bhvHiddenRedCoinStar
 gLinker.behaviors.bhvHiddenStaircaseStep = bhvHiddenStaircaseStep
 gLinker.behaviors.bhvHiddenStar = bhvHiddenStar
