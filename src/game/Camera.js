@@ -15,12 +15,12 @@ import { SurfaceCollisionInstance as SurfaceCollision } from "../engine/SurfaceC
 import { atan2s, vec3f_set, sqrtf,vec3f_set_dist_and_angle } from "../engine/math_util"
 import * as MathUtil from "../engine/math_util"
 import * as Mario from "./Mario"
-import { oBehParams2ndByte, oHeldState, oHomeX, oHomeY, oHomeZ, oMoveAnglePitch, oMoveAngleRoll, oMoveAngleYaw, oPosX, oPosY, oPosZ } from "../include/object_constants"
+import { BOWSER_CAM_ACT_END, BOWSER_CAM_ACT_WALK, oBehParams2ndByte, oBowserCamAct, oHeldState, oHomeX, oHomeY, oHomeZ, oMoveAnglePitch, oMoveAngleRoll, oMoveAngleYaw, oPosX, oPosY, oPosZ } from "../include/object_constants"
 import { CELL_HEIGHT_LIMIT, FLOOR_LOWER_LIMIT, SURFACE_DEATH_PLANE, SURFACE_IS_PAINTING_WARP, SURFACE_PAINTING_WARP_F9, SURFACE_PAINTING_WOBBLE_A6, SURFACE_WALL_MISC } from "../include/surface_terrains"
 import { sins, s16, int16, coss, random_float } from "../utils"
 import { HudInstance as Hud } from "./Hud"
 import { CAM_SELECTION_FIXED, CAM_SELECTION_MARIO, DIALOG_RESPONSE_NONE } from "./IngameMenu"
-import { DIALOG_001, DIALOG_010, DIALOG_020, DIALOG_NONE } from "../text/us/dialogs"
+import { DIALOG_001, DIALOG_010, DIALOG_020, DIALOG_067, DIALOG_092, DIALOG_093, DIALOG_NONE } from "../text/us/dialogs"
 import { gLastCompletedStarNum } from "./SaveFile"
 import { COURSE_CCM, course_dance_cutscenes, COURSE_JRB, COURSE_MAX, COURSE_NONE, COURSE_RR, COURSE_SL, COURSE_TTC, COURSE_TTM, COURSE_WDW } from "../levels/course_defines"
 import { level_defines } from "../levels/level_defines_constants"
@@ -56,7 +56,7 @@ import { SURFACE_CAMERA_8_DIR } from "../include/surface_terrains"
 import { SURFACE_BOSS_FIGHT_CAMERA } from "../include/surface_terrains"
 import { SURFACE_INSTANT_WARP_1B } from "../include/surface_terrains"
 import { SURFACE_INSTANT_WARP_1C } from "../include/surface_terrains"
-import { MARIO_DIALOG_STATUS_SPEAK } from "./MarioActionsCutscene"
+import { MARIO_DIALOG_STATUS_SPEAK, MARIO_DIALOG_STOP } from "./MarioActionsCutscene"
 import { MARIO_DIALOG_LOOK_FRONT } from "./MarioActionsCutscene"
 import { set_mario_npc_dialog } from "./MarioActionsCutscene"
 import { pitch } from "style-loader"
@@ -1299,6 +1299,12 @@ class Camera {
             { shot: this.cutscene_intro_peach_dialog.bind(this), duration: CUTSCENE_LOOP }
         ]
 
+        this.sCutsceneEnterBowserArena = [
+            { shot: this.cutscene_bowser_arena.bind(this), duration: 180 },
+            { shot: this.cutscene_bowser_arena_dialog.bind(this), duration: CUTSCENE_LOOP },
+            { shot: this.cutscene_bowser_arena_end.bind(this), duration: 0 },
+        ]
+
         this.sCutsceneDanceDefaultRotate = [
             { shot: this.cutscene_dance_default_rotate.bind(this), duration: CUTSCENE_LOOP }
         ]
@@ -1376,7 +1382,7 @@ class Camera {
             160: this.sCutsceneExitPaintingSuccess,
             // [ CUTSCENE_UNUSED_EXIT,  this.sCutsceneUnusedExit ],
             142: this.sCutsceneIntroPeach,
-            // [ CUTSCENE_ENTER_BOWSER_ARENA, this.sCutsceneEnterBowserArena ],
+            144: this.sCutsceneEnterBowserArena,
             143: this.sCutsceneDanceDefaultRotate,
             175: this.sCutsceneDanceDefaultRotate,
             165: this.sCutsceneDanceFlyAway,
@@ -7794,6 +7800,163 @@ class Camera {
         this.cutscene_event(this.cutscene_key_dance_jump_cvar, c, 11, -1);
         this.cutscene_event(this.cutscene_key_dance_shake_fov, c, 54, 54);
         this.cutscene_event(this.cutscene_key_dance_handheld_shake, c, 52, -1);
+    }
+
+    cutscene_bowser_area_shake_fov() {
+        this.cutscene_set_fov_shake_preset(2)
+    }
+
+    /**
+     * Set oBowserCamAct to 1, which causes bowser to start walking.
+     */
+    cutscene_bowser_area_start_bowser_walking() {
+        this.gSecondCameraFocus.rawData[oBowserCamAct] = BOWSER_CAM_ACT_WALK
+    }
+
+    /**
+     * Offset the camera from bowser using cvar2 and cvar3
+     * @bug cvar2.point is (0,0,0) on the first frame, but because of the warp transition, this behavior
+     *      isn't seen. After the first frame, cvar2.point is bowser's position.
+     */
+    cutscene_bowser_arena_set_pos(c) {
+        vec3f_set_dist_and_angle(this.sCutsceneVars[2].point, c.pos, this.sCutsceneVars[3].point[2], this.sCutsceneVars[3].angle[0], this.sCutsceneVars[3].angle[1])
+        vec3f_set(this.sCutsceneVars[2].point,
+            this.gSecondCameraFocus.rawData[oPosX],
+            this.gSecondCameraFocus.rawData[oPosY],
+            this.gSecondCameraFocus.rawData[oPosZ])
+    }
+    /**
+     * Apply a sine wave to the focus's y coordinate.
+     * The y offset starts at 120, then decreases to 0 before reaching ~240 on the last frame.
+     */
+    cutscene_bowser_arena_focus_sine() {
+        yOff = sins(this.sCutsceneVars[4].angle[1]) * 120.0 + 120.0
+        this.sCutsceneVars[4].angle[1] -= 0x200
+        this.approach_f32_asymptotic_bool(this.sCutsceneVars[0].point[1], yOff, 0.5)
+    }
+
+    /**
+     * Set the camera focus according to cvar0 and cvar2.
+     */
+    cutscene_bowser_arena_set_focus(c) {
+        this.offset_rotated(c.focus, this.sCutsceneVars[2].point, this.sCutsceneVars[0].point, this.sCutsceneVars[2].angle)
+    }
+
+    /**
+     * Adjust the cvar offsets, making the camera look up, move slightly further back, and focus a little
+     * further in front of bowser.
+     */
+    cutscene_bowser_arena_adjust_offsets() {
+        approach_s16_asymptotic_bool(sCutsceneVars[3].angle[0], 0x6C8, 30)
+        approach_f32_asymptotic_bool(sCutsceneVars[0].point[2], -200.0, 0.02)
+        approach_f32_asymptotic_bool(sCutsceneVars[3].point[2], 550.0, 0.02)
+    }
+
+    /**
+     * Decrease cvar0's z offset, making the camera focus pan left towards bowser.
+     */
+    cutscene_bowser_arena_pan_left() {
+        this.approach_f32_asymptotic_bool(this.sCutsceneVars[0].point[2], 0.0, 0.05)
+    }
+
+    /**
+     * Duplicate of cutscene_mario_dialog().
+     */
+    cutscene_bowser_arena_mario_dialog() {
+        cutscene_common_set_dialog_state(MARIO_DIALOG_LOOK_FRONT)
+    }
+
+    cutscene_stop_dialog() {
+        cutscene_common_set_dialog_state(MARIO_DIALOG_STOP)
+    }
+
+    /**
+     * Active for the first 5 frames of the cutscene.
+     * cvar3 is the camera's polar offset from bowser
+     * cvar2.angle is bowser's move angle
+     *
+     * cvar0 is the focus offset from bowser
+     */
+    cutscene_bowser_arena_start(c) {
+        this.sCutsceneVars[3].point[2] = 430.0
+        this.sCutsceneVars[3].angle[1] = this.gSecondCameraFocus.rawData[oMoveAngleYaw] - DEGREES(45)
+        this.sCutsceneVars[3].angle[0] = 0xD90
+
+        vec3f_set(this.sCutsceneVars[0].point, 0.0, 120.0, -800.0)
+        MathUtil.vec3s_set(this.sCutsceneVars[2].angle,
+            this.gSecondCameraFocus.rawData[oMoveAnglePitch],
+            this.gSecondCameraFocus.rawData[oMoveAngleYaw],
+            this.gSecondCameraFocus.rawData[oMoveAngleRoll])
+        
+        // Set the camera's position and focus.
+        this.cutscene_bowser_arena_set_pos(c)
+        this.cutscene_bowser_arena_set_focus(c)
+    }
+
+    /**
+     * Create the dialog box depending on which bowser fight Mario is in.
+     */
+    bowser_fight_intro_dialog() {
+        let dialog
+
+        switch (Area.gCurrLevelNum) {
+            case LEVEL_BOWSER_1:
+                dialog = DIALOG_067
+                break
+            
+            case LEVEL_BOWSER_2:
+                dialog = DIALOG_092
+                break
+            
+            default: // LEVEL_BOWSER_3
+                dialog = DIALOG_093
+        }
+
+        IngameMenu.create_dialog_box(dialog)
+    }
+
+    /**
+     * Create the dialog box and wait until it's gone.
+     */
+    cutscene_bowser_arena_dialog(c) {
+        this.cutscene_event(this.bowser_fight_intro_dialog, c, 0, 0)
+
+        if (IngameMenu.get_dialog_id() == DIALOG_NONE) {
+            this.gCutsceneTimer = CUTSCENE_LOOP
+        }
+    }
+
+    /**
+     * End the bowser arena cutscene.
+     */
+    cutscene_bowser_arena_end(c) {
+        this.cutscene_stop_dialog(c)
+        c.cutscene = 0
+        this.transition_next_state(c, 20)
+        this.sStatusFlags |= CAM_FLAG_UNUSED_CUTSCENE_ACTIVE
+        this.sModeOffsetYaw = this.gPlayerCameraState.faceAngle[1] + DEGREES(90)
+        this.gSecondCameraFocus.rawData[oBowserCamAct] = BOWSER_CAM_ACT_END
+    }
+
+    /**
+     * Cutscene that plays when Mario enters a bowser fight.
+     */
+    cutscene_bowser_arena(c) {
+        if (this.gSecondCameraFocus != null) {
+            this.cutscene_event(this.cutscene_bowser_arena_mario_dialog, c, 0, -1)
+            this.cutscene_event(this.cutscene_bowser_arena_start, c, 0, 5)
+            this.cutscene_event(this.cutscene_bowser_area_start_bowser_walking, c, 40, 40)
+            this.cutscene_event(this.cutscene_bowser_area_shake_fov, c, 145, 145)
+            this.cutscene_event(this.cutscene_bowser_arena_set_pos, c, 40, -1)
+            this.cutscene_event(this.cutscene_bowser_arena_pan_left, c, 40, 99)
+            this.cutscene_event(this.cutscene_bowser_arena_adjust_offsets, c, 100, -1)
+            this.cutscene_event(this.cutscene_bowser_arena_focus_sine, c, 40, 140)
+            this.cutscene_event(this.cutscene_bowser_arena_set_focus, c, 40, -1)
+            this.cutscene_event(this.cutscene_shake_explosion, c, 60, 60)
+            this.cutscene_event(this.cutscene_shake_explosion, c, 82, 82)
+            this.cutscene_event(this.cutscene_shake_explosion, c, 109, 109)
+            this.cutscene_event(this.cutscene_shake_explosion, c, 127, 127)
+        }
     }
 
     // ---------------- //

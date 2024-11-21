@@ -223,26 +223,11 @@ export class n64GfxProcessor {
                         this.rsp.modelview_matrix_stack[this.rsp.modelview_matrix_stack_size - 1],
                         this.rsp.P_matrix
                     )
-                } else {
-                    this.rsp.modelview_matrix_stack_size++
                 }
             }
         }
     }
 
-    sp_pop_matrix(count) {
-        while (count--) {
-            if (this.rsp.modelview_matrix_stack_size > 0) {
-                if (--this.rsp.modelview_matrix_stack_size > 0) {
-                    this.matrix_mul(
-                        this.rsp.MP_matrix,
-                        this.rsp.modelview_matrix_stack[this.rsp.modelview_matrix_stack_size - 1],
-                        this.rsp.P_matrix
-                    )
-                }
-            }
-        }
-    }
 
     sp_geometry_mode(clear, set) {
         this.rsp.geometry_mode &= ~clear
@@ -564,12 +549,12 @@ export class n64GfxProcessor {
             if (!this.viewportsEqual(this.rdp.viewport, this.rendering_state.viewport)) {
                 this.flush()
                 WebGL.set_viewport(this.rdp.viewport)
-                this.rendering_state.viewport = { ...this.rdp.viewport }
+                this.rendering_state.viewport = this.rdp.viewport
             }
             if (!this.viewportsEqual(this.rdp.scissor, this.rendering_state.scissor)) {
                 this.flush()
                 WebGL.set_scissor(this.rdp.scissor)
-                this.rendering_state.scissor = { ...this.rdp.scissor }
+                this.rendering_state.scissor = this.rdp.scissor
             }
             this.rdp.viewport_or_scissor_changed = false
         }
@@ -1105,7 +1090,8 @@ export class n64GfxProcessor {
                         prev_op = ["G_MTX", `Parameters: ${args.parameters}, Matrix: ${args.matrix}`]
                         break
                     case Gbi.G_POPMTX:
-                        this.sp_pop_matrix(1);
+                        this.sp_pop_matrix(args.matrix / 64);
+                        prev_op = ["G_POPMTX", `Matrix: ${args.matrix}`]
                         break
                     case Gbi.G_VTX:
                         this.sp_vertex(args.dest_index, args.vertices)

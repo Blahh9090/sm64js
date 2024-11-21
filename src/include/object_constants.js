@@ -379,21 +379,21 @@ export const oBBallSpawnerSpawnOdds     = 0x1C
 export const oBBallSpawnerPeriodMinus1  = 0x1D
 
 /* Bowser */
-export const oBowserUnk88            = 0x00
-export const oBowserUnkF4            = 0x1B
-export const oBowserUnkF8            = 0x1C
+export const oBowserCamAct           = 0x00
+export const oBowserStatus           = 0x1B
+export const oBowserTimer            = 0x1C
 export const oBowserDistToCentre     = 0x1D
-export const oBowserUnk106           = 0x1F
-export const oBowserUnk108           = 0x20
+export const oBowserBitSJustJump     = 0x1F
+export const oBowserRandSplitFloor   = 0x20
 export const oBowserHeldAnglePitch   = 0x20
 export const oBowserHeldAngleVelYaw  = 0x21
-export const oBowserUnk10E           = 0x21
-export const oBowserUnk110           = 0x22
+export const oBowserGrabbedStatus    = 0x21
+export const oBowserIsReacting       = 0x22
 export const oBowserAngleToCentre    = 0x22
-export const oBowserUnk1AC           = 0x49
-export const oBowserUnk1AE           = 0x49
+export const oBowserTargetOpacity    = 0x49
+export const oBowserEyesTimer        = 0x49
 export const oBowserEyesShut         = 0x4A
-export const oBowserUnk1B2           = 0x4A
+export const oBowserRainbowLight     = 0x4A
 
 /* Bowser Shockwave */
 export const oBowserShockWaveUnkF4  = 0x1B
@@ -1249,6 +1249,119 @@ export const CHAIN_CHOMP_SUB_ACT_LUNGE = 1
     export const MOV_YCOIN_ACT_BLINKING = 1
     export const MOV_YCOIN_ACT_LAVA_DEATH = 100
     export const MOV_YCOIN_ACT_DEATH_PLANE_DEATH = 101
+    
+/* Bowser */
+    /* Tail oAction */
+    export const BOWSER_ACT_TAIL_DEFAULT       = 0
+    export const BOWSER_ACT_TAIL_THROWN        = 1
+    export const BOWSER_ACT_TAIL_TOUCHED_MARIO = 2
+
+    /* oAction */
+    export const BOWSER_ACT_DEFAULT              = 0
+    export const BOWSER_ACT_THROWN               = 1
+    export const BOWSER_ACT_JUMP_ONTO_STAGE      = 2
+    export const BOWSER_ACT_DANCE                = 3
+    export const BOWSER_ACT_DEAD                 = 4
+    export const BOWSER_ACT_WAIT                 = 5
+    export const BOWSER_ACT_INTRO_WALK           = 6
+    export const BOWSER_ACT_CHARGE_MARIO         = 7
+    export const BOWSER_ACT_SPIT_FIRE_INTO_SKY   = 8
+    export const BOWSER_ACT_SPIT_FIRE_ONTO_FLOOR = 9
+    export const BOWSER_ACT_HIT_EDGE             = 10
+    export const BOWSER_ACT_TURN_FROM_EDGE       = 11
+    export const BOWSER_ACT_HIT_MINE             = 12
+    export const BOWSER_ACT_BIG_JUMP             = 13
+    export const BOWSER_ACT_WALK_TO_MARIO        = 14
+    export const BOWSER_ACT_BREATH_FIRE          = 15
+    export const BOWSER_ACT_TELEPORT             = 16
+    export const BOWSER_ACT_QUICK_JUMP           = 17
+    export const BOWSER_ACT_UNUSED_SLOW_WALK     = 18
+    export const BOWSER_ACT_TILT_LAVA_PLATFORM   = 19
+
+    /* Animations */
+    export const BOWSER_ANIM_STAND_UP            = 0
+    export const BOWSER_ANIM_STAND_UP_UNUSED     = 1 // slightly different
+    export const BOWSER_ANIM_SHAKING             = 2
+    export const BOWSER_ANIM_GRABBED             = 3
+    export const BOWSER_ANIM_BROKEN              = 4 // broken animation
+    export const BOWSER_ANIM_FALL_DOWN           = 5 // unused
+    export const BOWSER_ANIM_BREATH              = 6
+    export const BOWSER_ANIM_JUMP                = 7 // unused, short jump, replaced by start/stop
+    export const BOWSER_ANIM_JUMP_STOP           = 8
+    export const BOWSER_ANIM_JUMP_START          = 9
+    export const BOWSER_ANIM_DANCE               = 10
+    export const BOWSER_ANIM_BREATH_UP           = 11
+    export const BOWSER_ANIM_IDLE                = 12
+    export const BOWSER_ANIM_SLOW_GAIT           = 13
+    export const BOWSER_ANIM_LOOK_DOWN_STOP_WALK = 14
+    export const BOWSER_ANIM_LOOK_UP_START_WALK  = 15
+    export const BOWSER_ANIM_FLIP_DOWN           = 16
+    export const BOWSER_ANIM_LAY_DOWN            = 17
+    export const BOWSER_ANIM_RUN_START           = 18
+    export const BOWSER_ANIM_RUN                 = 19
+    export const BOWSER_ANIM_RUN_STOP            = 20
+    export const BOWSER_ANIM_RUN_SLIP            = 21
+    export const BOWSER_ANIM_BREATH_QUICK        = 22
+    export const BOWSER_ANIM_EDGE_MOVE           = 23
+    export const BOWSER_ANIM_EDGE_STOP           = 24
+    export const BOWSER_ANIM_FLIP                = 25
+    export const BOWSER_ANIM_STAND_UP_FROM_FLIP  = 26
+
+    /* oBhvParams2ndByte */
+    export const BOWSER_BP_BITDW = 0
+    export const BOWSER_BP_BITFS = 1
+    export const BOWSER_BP_BITS  = 2
+
+    /* oBowserCamAct */
+    export const BOWSER_CAM_ACT_IDLE = 0
+    export const BOWSER_CAM_ACT_WALK = 1
+    export const BOWSER_CAM_ACT_END  = 2
+
+    /* oBowserStatus */
+    export const BOWSER_STATUS_ANGLE_MARIO  = (1 <<  1) // 0x00000002
+    export const BOWSER_STATUS_ANGLE_CENTER = (1 <<  2) // 0x00000004
+    export const BOWSER_STATUS_DIST_MARIO   = (1 <<  3) // 0x00000008
+    export const BOWSER_STATUS_DIST_CENTER  = (1 <<  4) // 0x00000010
+    export const BOWSER_STATUS_BIG_JUMP     = (1 << 16) // 0x00010000
+    export const BOWSER_STATUS_FIRE_SKY     = (1 << 17) // 0x00020000
+
+    /* oBowserGrabbedStatus */
+    export const BOWSER_GRAB_STATUS_NONE    = 0
+    export const BOWSER_GRAB_STATUS_GRABBED = 1
+    export const BOWSER_GRAB_STATUS_HOLDING = 2
+
+    /* oSubAction */
+    export const BOWSER_SUB_ACT_DEAD_FLY_BACK           = 0
+    export const BOWSER_SUB_ACT_DEAD_BOUNCE             = 1
+    export const BOWSER_SUB_ACT_DEAD_WAIT               = 2
+    export const BOWSER_SUB_ACT_DEAD_DEFAULT_END        = 3
+    export const BOWSER_SUB_ACT_DEAD_DEFAULT_END_OVER   = 4
+    export const BOWSER_SUB_ACT_DEAD_FINAL_END          = 10
+    export const BOWSER_SUB_ACT_DEAD_FINAL_END_OVER     = 11
+
+    export const BOWSER_SUB_ACT_CHARGE_START            = 0
+    export const BOWSER_SUB_ACT_CHARGE_RUN              = 1
+    export const BOWSER_SUB_ACT_CHARGE_END              = 2
+    export const BOWSER_SUB_ACT_CHARGE_SLIP             = 3
+
+    export const BOWSER_SUB_ACT_TELEPORT_START          = 0
+    export const BOWSER_SUB_ACT_TELEPORT_MOVE           = 1
+    export const BOWSER_SUB_ACT_TELEPORT_STOP           = 2
+
+    export const BOWSER_SUB_ACT_HIT_MINE_START          = 0
+    export const BOWSER_SUB_ACT_HIT_MINE_FALL           = 1
+    export const BOWSER_SUB_ACT_HIT_MINE_STOP           = 2
+
+    export const BOWSER_SUB_ACT_JUMP_ON_STAGE_IDLE      = 0
+    export const BOWSER_SUB_ACT_JUMP_ON_STAGE_START     = 1
+    export const BOWSER_SUB_ACT_JUMP_ON_STAGE_LAND      = 2
+    export const BOWSER_SUB_ACT_JUMP_ON_STAGE_STOP      = 3
+
+/* Bowser BitS Platform */
+    /* oAction */
+    export const BOWSER_BITS_PLAT_ACT_START = 0
+    export const BOWSER_BITS_PLAT_ACT_CHECK = 1
+    export const BOWSER_BITS_PLAT_ACT_FALL  = 2
 
 /* oChainChompReleaseStatus */
 export const CHAIN_CHOMP_NOT_RELEASED = 0
